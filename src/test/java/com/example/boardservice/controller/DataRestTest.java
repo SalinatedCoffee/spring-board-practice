@@ -10,7 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 // Java static imports (https://en.wikipedia.org/wiki/Static_import)
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -86,5 +86,20 @@ public class DataRestTest {
         .andExpect(status().isOk())
         // HAL contenttype not predefined, define custom mediatype instead
         .andExpect(content().contentType(MediaType.valueOf("application/hal+json")));
+  }
+
+
+  @DisplayName("[API] Don't expose user-related endpoints")
+  @Test
+  void givenNothing_whenRequestingUserAccounts_thenThrowsException() throws Exception {
+    // Given
+
+    // When & Then
+    mvc.perform(get("/api/userAccounts")).andExpect(status().isNotFound());
+    mvc.perform(post("/api/userAccounts")).andExpect(status().isNotFound());
+    mvc.perform(put("/api/userAccounts")).andExpect(status().isNotFound());
+    mvc.perform(patch("/api/userAccounts")).andExpect(status().isNotFound());
+    mvc.perform(delete("/api/userAccounts")).andExpect(status().isNotFound());
+    mvc.perform(head("/api/userAccounts")).andExpect(status().isNotFound());
   }
 }

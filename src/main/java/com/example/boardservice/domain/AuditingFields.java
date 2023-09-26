@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 // declare this class as an audited entity (JPA)
 @MappedSuperclass
-public class AuditingFields {
+public abstract class AuditingFields {
 
   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
   @CreatedDate

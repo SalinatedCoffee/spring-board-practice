@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Board page</title>
+</head>
+<body>
+
+<header th:replace="header :: header"></header>
+
+<main>
+    <form>
+        <label for="search-type" hidden>Type</label>
+        <select id="search-type" name="search-type">
+            <option>Title</option>
+            <option>Content</option>
+            <option>ID</option>
+            <option>Nickname</option>
+            <option>Hashtag</option>
+        </select>
+        <label for="search-query" hidden>Search query</label>
+        <input id="search-query" placeholder="Search for..." name="search-query">
+        <button type="submit">Search</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Hashtag</th>
+                <th>Author</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>First Post</td>
+            <td>#something</td>
+            <td>John</td>
+            <td>2099-12-31</td>
+        </tr>
+        <tr>
+            <td>Second Post</td>
+            <td>#somethingnew</td>
+            <td>Jake</td>
+            <td>2099-10-3</td>
+        </tr>
+        <tr>
+            <td>Third Post</td>
+            <td>#yetsomethingnew</td>
+            <td>Jack</td>
+            <td>2099-1-1</td>
+        </tr>
+        </tbody>
+    </table>
+<nav>
+    <table>
+        <tr>
+            <td>Previous</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>Next</td>
+        </tr>
+    </table>
+</nav>
+</main>
+
+<footer th:replace="footer :: footer"></footer>
+
+</body>
+</html>

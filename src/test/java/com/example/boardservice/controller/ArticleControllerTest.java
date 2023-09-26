@@ -14,7 +14,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Disabled("Not yet implemented")
 @DisplayName("View controller: articles")
 // only load relevant bean
 @WebMvcTest(ArticleController.class)
@@ -33,11 +32,12 @@ class ArticleControllerTest {
     // when & then
     mvc.perform(get("/articles"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.TEXT_HTML))
+        .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
         .andExpect(view().name("articles/index"))
         .andExpect(model().attributeExists("articles"));
   }
 
+  @Disabled("Not yet implemented")
   @DisplayName("[View][GET] Single article page - normal call")
   @Test
   public void givenNothing_whenRequestingArticleView_thenReturnsArticleView() throws Exception {
@@ -45,12 +45,13 @@ class ArticleControllerTest {
     // when & then
     mvc.perform(get("/articles/1"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.TEXT_HTML))
+        .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
         .andExpect(view().name("articles/detail"))
         .andExpect(model().attributeExists("article"))
         .andExpect(view().name("articleComments"));
   }
 
+  @Disabled("Not yet implemented")
   @DisplayName("[View][GET] Article search page - normal call")
   @Test
   public void givenNothing_whenRequestingArticleSearchView_thenReturnsArticleSearchView() throws Exception {
@@ -58,10 +59,11 @@ class ArticleControllerTest {
     // when & then
     mvc.perform(get("/articles/search"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.TEXT_HTML))
+        .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
         .andExpect(view().name("articles/search"));
   }
 
+  @Disabled("Not yet implemented")
   @DisplayName("[View][GET] Article hashtag search page - normal call")
   @Test
   public void givenNothing_whenRequestingArticleHashtagSearchView_thenReturnsArticleHashtagSearchView() throws Exception {
@@ -69,7 +71,7 @@ class ArticleControllerTest {
     // when & then
     mvc.perform(get("/articles/search-hashtag"))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.TEXT_HTML))
+        .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
         .andExpect(view().name("articles/search-hashtag"));
   }
 }

@@ -37,7 +37,6 @@ class ArticleControllerTest {
         .andExpect(model().attributeExists("articles"));
   }
 
-  @Disabled("Not yet implemented")
   @DisplayName("[View][GET] Single article page - normal call")
   @Test
   public void givenNothing_whenRequestingArticleView_thenReturnsArticleView() throws Exception {

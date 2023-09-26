@@ -27,6 +27,11 @@ spring:
   data.rest:
     base-path: /api
     detection-strategy: annotated
+  # option exposed via ThymeleafConfig.Thymeleaf3Properties
+  # IDE-level documentation and autocomplete enabled via configuration-processor package
+  thymeleaf3:
+    decoupled-logic: true
+
 
 ---
 

@@ -25,17 +25,19 @@ public class ArticleComment extends AuditingFields {
   // can also be implemented without annotation, eg. private Long articleId
   // but best practice is to decouple and use annotation
   @Setter @ManyToOne(optional = false) private Article article;
+  @Setter @ManyToOne(optional = false) private UserAccount userAccount;
   @Setter @Column(nullable = false, length = 500) private String content;
 
   protected ArticleComment() {}
 
-  private ArticleComment(Article article, String content) {
+  private ArticleComment(Article article, UserAccount userAccount, String content) {
     this.article = article;
+    this.userAccount = userAccount;
     this.content = content;
   }
 
-  private ArticleComment of(Article article, String content) {
-    return new ArticleComment(article, content);
+  public static ArticleComment of(Article article, UserAccount userAccount, String content) {
+    return new ArticleComment(article, userAccount, content);
   }
 
   @Override

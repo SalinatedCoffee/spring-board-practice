@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.apache.catalina.User;
 
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -27,6 +28,8 @@ public class Article extends AuditingFields {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Setter @ManyToOne(optional = false) private UserAccount userAccount;
+
   // note that id does not have annotation @Setter
   // we want id to be unchangeable
   // @Column(...) to designate columns as not null
@@ -47,7 +50,8 @@ public class Article extends AuditingFields {
   // a no-param protected or public constructor is required by framework
   protected Article() {}
 
-  private Article(String title, String content, String hashtag) {
+  private Article(UserAccount userAccount, String title, String content, String hashtag) {
+    this.userAccount = userAccount;
     this.title = title;
     this.content = content;
     this.hashtag = hashtag;
@@ -56,8 +60,8 @@ public class Article extends AuditingFields {
   // factory constructor
   // of is shorthand for method name
   // https://stackoverflow.com/questions/48256270/what-does-the-naming-convention-of-mean-in-java
-  public static Article of(String title, String content, String hashtag) {
-    return new Article(title, content, hashtag);
+  public static Article of(UserAccount userAccount, String title, String content, String hashtag) {
+    return new Article(userAccount, title, content, hashtag);
   }
 
   // if article has not been given an id (null) by the database

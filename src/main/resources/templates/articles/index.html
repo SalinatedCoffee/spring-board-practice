@@ -2,34 +2,60 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Board page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="/css/search-bar.css" rel="stylesheet">
 </head>
+
 <body>
 
 <header id="header"></header>
 
-<main>
-    <form>
-        <label for="search-type" hidden>Type</label>
-        <select id="search-type" name="search-type">
-            <option>Title</option>
-            <option>Content</option>
-            <option>ID</option>
-            <option>Nickname</option>
-            <option>Hashtag</option>
-        </select>
-        <label for="search-query" hidden>Search query</label>
-        <input id="search-query" placeholder="Search for..." name="search-query">
-        <button type="submit">Search</button>
-    </form>
-
-    <table>
+<main class="container">
+    <div class="row">
+        <div class="card card-margin search-form">
+            <div class="card-body p-0">
+                <form id="card search-form">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="row no-gutters">
+                                <div class="col-lg-3 col-md-3 col-sm-12 p-0">
+                                    <label for="search-type" hidden>Search Type</label>
+                                    <select class="form-control" id="search-type">
+                                        <option>Title</option>
+                                        <option>Content</option>
+                                        <option>ID</option>
+                                        <option>Nickname</option>
+                                        <option>Hashtag</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-8 col-md-6 col-sm-12 p-0">
+                                    <label for="search-value" hidden>Search</label>
+                                    <input type="text" placeholder="Search..." class="form-control" id="search-value" name="search-value">
+                                </div>
+                                <div class="col-lg-1 col-md-3 col-sm-12 p-0">
+                                    <button type="submit" class="btn btn-base">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <table class="table">
         <thead>
             <tr>
-                <th>Title</th>
-                <th>Hashtag</th>
-                <th>Author</th>
-                <th>Timestamp</th>
+                <th class="col-6">Title</th>
+                <th class="col-2">Hashtag</th>
+                <th class="col">Author</th>
+                <th class="col">Timestamp</th>
             </tr>
         </thead>
         <tbody>
@@ -53,21 +79,18 @@
         </tr>
         </tbody>
     </table>
-<nav>
-    <table>
-        <tr>
-            <td>Previous</td>
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-            <td>4</td>
-            <td>Next</td>
-        </tr>
-    </table>
-</nav>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+            <li class="page-item"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+        </ul>
+    </nav>
 </main>
 
 <footer id="footer"></footer>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 </body>
 </html>

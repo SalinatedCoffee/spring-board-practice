@@ -17,6 +17,10 @@ spring:
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
+    # Important performance optimization: turn off open session in view in production
+    # tl;dr - with OSIV on, spring spins up a hibernate session for each request and keeps it alive until req is served
+    # read: https://www.baeldung.com/spring-open-session-in-view
+    open-in-view: false
     defer-datasource-initialization: true
     hibernate.ddl-auto: create
     show-sql: true

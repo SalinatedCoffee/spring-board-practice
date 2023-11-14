@@ -10,6 +10,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+// what are services anyway, and what logic should live in the service layer?
+// read this: https://stackoverflow.com/questions/16862611/domain-dao-and-service-layers
+
 @RequiredArgsConstructor
 @Transactional
 @Service

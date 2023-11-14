@@ -19,6 +19,9 @@ public record ArticleDto(
     return new ArticleDto(id, userAccountDto, title, content, hashtag, createdAt, createdBy, modifiedAt, modifiedBy);
   }
 
+  // convert between Article entity and Article DTO
+  // decouples article->DTO; Article entity can have zero knowledge of DTO
+  // DTO still depends on entity
   public static ArticleDto from(Article entity) {
     return new ArticleDto(
         entity.getId(),

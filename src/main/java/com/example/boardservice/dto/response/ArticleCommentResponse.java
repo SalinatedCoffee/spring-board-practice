@@ -5,6 +5,10 @@ import com.example.boardservice.dto.ArticleCommentDto;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+// the main reason for implementing separate response dtos is to decouple the original dtos from the controller layer
+// because we have implemented a special response dto for use in controllers, the controller layer can have zero
+// knowledge of the original dtos
+// the service layer is the only layer that has knowledge of both dtos and domain
 public record ArticleCommentResponse(
     Long id,
     String content,

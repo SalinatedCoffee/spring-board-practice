@@ -12,6 +12,13 @@ import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
+/*
+difference between domain (DAO) and repository implementations
+domains define (represent) a single data entry in the persistence layer
+repositories define (represent) a collection of entries in the persistence layer
+read this for further details: https://www.baeldung.com/java-dao-vs-repository
+or this: https://stackoverflow.com/questions/8550124/what-is-the-difference-between-dao-and-repository-patterns
+ */
 
 @RepositoryRestResource
 public interface ArticleRepository extends

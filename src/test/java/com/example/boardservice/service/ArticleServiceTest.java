@@ -123,7 +123,7 @@ public class ArticleServiceTest {
   void givenArticleIdAndModifiedInfo_whenUpdatingArticle_thenUpdatesArticle() {
     // Given
     Article article = createArticle();
-    ArticleDto dto = createArticleDto("새 타이틀", "새 내용", "#springboot");
+    ArticleDto dto = createArticleDto("New Title", "New Content", "#springboot");
     given(articleRepository.getReferenceById(dto.id())).willReturn(article);
 
     // When
@@ -141,7 +141,7 @@ public class ArticleServiceTest {
   @Test
   void givenNonexistentArticleInfo_whenUpdatingArticle_thenLogsWarningAndDoesNothing() {
     // Given
-    ArticleDto dto = createArticleDto("새 타이틀", "새 내용", "#springboot");
+    ArticleDto dto = createArticleDto("New Title", "New Content", "#springboot");
     given(articleRepository.getReferenceById(dto.id())).willThrow(EntityNotFoundException.class);
 
     // When

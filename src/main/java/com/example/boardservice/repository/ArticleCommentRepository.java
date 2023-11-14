@@ -18,6 +18,10 @@ public interface ArticleCommentRepository extends
     QuerydslPredicateExecutor<ArticleComment>,
     QuerydslBinderCustomizer<QArticleComment> {
 
+  // JPA query methods: Spring automagically derives queries through specially formatted method names
+  // read more here: https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#repository-query-keywords
+  // underbar means that element after underbar is mapped under the element before underbar
+  // just think of it as accessing an object parameter like this: Article.Id
   List<ArticleComment> findByArticle_Id(Long articleId);
 
   @Override

@@ -2,6 +2,7 @@ package com.example.boardservice.repository;
 
 import com.example.boardservice.config.JpaConfig;
 import com.example.boardservice.domain.Article;
+import com.example.boardservice.domain.UserAccount;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +20,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class JpaRepositoryTest {
   private final ArticleRepository articleRepository;
   private final ArticleCommentRepository articleCommentRepository;
+  private final UserAccountRepository userAccountRepository;
 
-  public JpaRepositoryTest(@Autowired ArticleRepository articleRepository, @Autowired ArticleCommentRepository articleCommentRepository) {
+  public JpaRepositoryTest(@Autowired ArticleRepository articleRepository,
+                           @Autowired ArticleCommentRepository articleCommentRepository,
+                           @Autowired UserAccountRepository userAccountRepository) {
     this.articleRepository = articleRepository;
     this.articleCommentRepository = articleCommentRepository;
+    this.userAccountRepository = userAccountRepository;
   }
 
   // g-w-t template for testing CRUD
@@ -44,8 +49,9 @@ class JpaRepositoryTest {
     // insert new article and see if article count changes
     // given
     long previousCount = articleRepository.count();
+    UserAccount userAccount =  userAccountRepository.save(UserAccount.of("sc", "pw", null, null, null));
     // when
-    articleRepository.save(Article.of("new article", "new content", "#spring"));
+    articleRepository.save(Article.of(userAccount, "new title", "new content", "#spring"));
     // then
     assertThat(articleRepository.count())
         .isEqualTo(previousCount + 1);

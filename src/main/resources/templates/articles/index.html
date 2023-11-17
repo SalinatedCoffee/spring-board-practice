@@ -10,7 +10,9 @@
 
 <body>
 
-<header id="header"></header>
+<header id="header">
+    Header template
+</header>
 
 <main class="container">
     <div class="row">
@@ -49,21 +51,21 @@
             </div>
         </div>
     </div>
-    <table class="table">
+    <table class="table" id="article-table">
         <thead>
             <tr>
-                <th class="col-6">Title</th>
-                <th class="col-2">Hashtag</th>
-                <th class="col">Author</th>
-                <th class="col">Timestamp</th>
+                <th class="title col-6">Title</th>
+                <th class="hashtag col-2">Hashtag</th>
+                <th class="user-id col">Author</th>
+                <th class="created-at col">Timestamp</th>
             </tr>
         </thead>
         <tbody>
         <tr>
-            <td>First Post</td>
-            <td>#something</td>
-            <td>John</td>
-            <td><time>2099-12-31</time></td>
+            <td class="title"><a>First Post</a></td>
+            <td class="hashtag">#something</td>
+            <td class="user-id">John</td>
+            <td class="created-at"><time>2099-12-31</time></td>
         </tr>
         <tr>
             <td>Second Post</td>
@@ -90,7 +92,9 @@
     </nav>
 </main>
 
-<footer id="footer"></footer>
+<footer id="footer">
+    Footer template
+</footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 </body>
 </html>

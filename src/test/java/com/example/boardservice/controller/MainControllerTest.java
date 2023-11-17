@@ -1,6 +1,7 @@
 package com.example.boardservice.controller;
 
 import com.example.boardservice.config.SecurityConfig;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -28,9 +29,9 @@ class MainControllerTest {
 
     // wt
     mvc.perform(get("/"))
-        .andExpect(status().isOk())
-        .andExpect(view().name("forward:/articles"))
-        .andExpect(forwardedUrl("/articles"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(view().name("redirect:/articles"))
+        .andExpect(redirectedUrl("/articles"))
         .andDo(MockMvcResultHandlers.print());
   }
 }

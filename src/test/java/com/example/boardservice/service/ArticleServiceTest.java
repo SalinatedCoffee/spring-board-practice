@@ -9,6 +9,7 @@ import com.example.boardservice.dto.ArticleWithCommentsDto;
 import com.example.boardservice.dto.UserAccountDto;
 import com.example.boardservice.repository.ArticleRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,14 +56,14 @@ public class ArticleServiceTest {
     SearchType searchType = SearchType.TITLE;
     String searchKeyword = "title";
     Pageable pageable = Pageable.ofSize(20);
-    given(articleRepository.findByTitle(searchKeyword, pageable)).willReturn(Page.empty());
+    given(articleRepository.findByTitleContaining(searchKeyword, pageable)).willReturn(Page.empty());
 
     // When
     Page<ArticleDto> articles = sut.searchArticles(searchType, searchKeyword, pageable);
 
     // Then
     assertThat(articles).isEmpty();
-    then(articleRepository).should().findByTitle(searchKeyword, pageable);
+    then(articleRepository).should().findByTitleContaining(searchKeyword, pageable);
   }
 
   @DisplayName("Return article when requesting article")
@@ -97,7 +98,7 @@ public class ArticleServiceTest {
     // Then
     assertThat(t)
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage("Article does noe exist - articleId: " + articleId);
+        .hasMessage("Article does not exist - articleId: " + articleId);
     then(articleRepository).should().findById(articleId);
   }
 

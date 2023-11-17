@@ -10,12 +10,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @DisplayName("View controller: authentication")
 @Import(SecurityConfig.class)
 @WebMvcTest
 class AuthControllerTest {
+
   private final MockMvc mvc;
 
   public AuthControllerTest(@Autowired MockMvc mvc) {
@@ -26,6 +28,7 @@ class AuthControllerTest {
   @Test
   public void givenNothing_whenTryingToLogIn_thenReturnsLoginView() throws Exception {
     // given
+
     // when & then
     mvc.perform(get("/login"))
         .andExpect(status().isOk())

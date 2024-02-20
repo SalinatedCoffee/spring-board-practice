@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
-@Disabled("Not yet implemented")
+//@Disabled("Not yet implemented")
 @DisplayName("Business logic - ArticleComment")
 @ExtendWith(MockitoExtension.class)
 class ArticleCommentServiceTest {

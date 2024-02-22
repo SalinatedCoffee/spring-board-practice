@@ -19,13 +19,13 @@
     <div class="row">
         <div class="card card-margin search-form">
             <div class="card-body p-0">
-                <form id="card search-form">
+                <form action="/articles" method="get">
                     <div class="row">
                         <div class="col-12">
                             <div class="row no-gutters">
                                 <div class="col-lg-3 col-md-3 col-sm-12 p-0">
                                     <label for="search-type" hidden>Search Type</label>
-                                    <select class="form-control" id="search-type">
+                                    <select class="form-control" id="search-type" name="searchType">
                                         <option>Title</option>
                                         <option>Content</option>
                                         <option>ID</option>
@@ -34,8 +34,8 @@
                                     </select>
                                 </div>
                                 <div class="col-lg-8 col-md-6 col-sm-12 p-0">
-                                    <label for="search-value" hidden>Search</label>
-                                    <input type="text" placeholder="Search..." class="form-control" id="search-value" name="search-value">
+                                    <label for="search-keyword" hidden>Search</label>
+                                    <input type="text" placeholder="Search..." class="form-control" id="search-keyword" name="searchKeyword">
                                 </div>
                                 <div class="col-lg-1 col-md-3 col-sm-12 p-0">
                                     <button type="submit" class="btn btn-base">

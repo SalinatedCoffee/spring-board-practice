@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 // what are services anyway, and what logic should live in the service layer?
 // read this: https://stackoverflow.com/questions/16862611/domain-dao-and-service-layers
 
@@ -73,5 +75,17 @@ public class ArticleService {
 
   public void deleteArticle(Long articleId) {
     articleRepository.deleteById(articleId);
+  }
+
+  @Transactional(readOnly = true)
+  public Page<ArticleDto> searchArticlesViaHashtag(String hashtag, Pageable pageable) {
+    if (hashtag == null || hashtag.isBlank()) {
+      return Page.empty(pageable);
+    }
+    return articleRepository.findByHashtag(hashtag, pageable).map(ArticleDto::from);
+  }
+
+  public List<String> getHashtags() {
+    return articleRepository.findAllDistinctHashtags();
   }
 }

@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -64,6 +65,36 @@ public class ArticleServiceTest {
     // Then
     assertThat(articles).isEmpty();
     then(articleRepository).should().findByTitleContaining(searchKeyword, pageable);
+  }
+
+  @DisplayName("Return empty article list when searching with hashtag but empty keyword provided")
+  @Test
+  void givenNoSearchParameters_whenSearchingArticlesViaHashtag_thenReturnsEmptyPage() {
+    // Given
+    Pageable pageable = Pageable.ofSize(20);
+
+    // When
+    Page<ArticleDto> articles = sut.searchArticlesViaHashtag(null, pageable);
+
+    // Then
+    assertThat(articles).isEqualTo(Page.empty(pageable));
+    then(articleRepository).shouldHaveNoInteractions();
+  }
+
+  @DisplayName("Return article list when searching with hashtag")
+  @Test
+  void givenHashtag_whenSearchingArticlesViaHashtag_thenReturnsArticleList() {
+    // Given
+    String hashtag = "#java";
+    Pageable pageable = Pageable.ofSize(20);
+    given(articleRepository.findByHashtag(hashtag, pageable)).willReturn(Page.empty(pageable));
+
+    // When
+    Page<ArticleDto> articles = sut.searchArticlesViaHashtag(hashtag, pageable);
+
+    // Then
+    assertThat(articles).isEqualTo(Page.empty(pageable));
+    then(articleRepository).should().findByHashtag(hashtag, pageable);
   }
 
   @DisplayName("Return article when requesting article")
@@ -165,6 +196,23 @@ public class ArticleServiceTest {
     // Then
     then(articleRepository).should().deleteById(articleId);
   }
+
+  @DisplayName("Return list of unique hashtags upon request")
+  @Test
+  void givenNothing_whenCalling_thenReturnsHashtags() {
+    // Given
+    List<String> expectedHashtags = List.of("#java", "#spring", "#boot");
+    given(articleRepository.findAllDistinctHashtags()).willReturn(expectedHashtags);
+
+    // When
+    List<String> actualHashtags = sut.getHashtags();
+
+    // Then
+    assertThat(actualHashtags).isEqualTo(expectedHashtags);
+    then(articleRepository).should().findAllDistinctHashtags();
+  }
+
+
   private UserAccount createUserAccount() {
     return UserAccount.of(
         "uno",

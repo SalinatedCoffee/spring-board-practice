@@ -1,9 +1,12 @@
 package com.example.boardservice.service;
 
+import com.example.boardservice.domain.Article;
 import com.example.boardservice.domain.ArticleComment;
+import com.example.boardservice.domain.UserAccount;
 import com.example.boardservice.dto.ArticleCommentDto;
 import com.example.boardservice.repository.ArticleCommentRepository;
 import com.example.boardservice.repository.ArticleRepository;
+import com.example.boardservice.repository.UserAccountRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +23,7 @@ public class ArticleCommentService {
 
   private final ArticleRepository articleRepository;
   private final ArticleCommentRepository articleCommentRepository;
+  private final UserAccountRepository userAccountRepository;
 
   @Transactional(readOnly = true)
   public List<ArticleCommentDto> searchArticleComments (Long articleId) {
@@ -32,9 +36,11 @@ public class ArticleCommentService {
 
   public void saveArticleComment(ArticleCommentDto dto) {
     try {
-      articleCommentRepository.save(dto.toEntity(articleRepository.getReferenceById(dto.articleId())));
+      Article article = articleRepository.getReferenceById(dto.articleId());
+      UserAccount userAccount = userAccountRepository.getReferenceById(dto.userAccountDto().userId());
+      articleCommentRepository.save(dto.toEntity(article, userAccount));
     } catch (EntityNotFoundException e) {
-      log.warn("Failed to save comment. Could not find article of comment - dto: {}", dto);
+      log.warn("Failed to save comment. Required information could not be found - dto: {}", e.getLocalizedMessage());
     }
   }
   public void updateArticleComment(ArticleCommentDto dto) {

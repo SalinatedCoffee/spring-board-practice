@@ -7,6 +7,7 @@ import com.example.boardservice.dto.ArticleCommentDto;
 import com.example.boardservice.dto.UserAccountDto;
 import com.example.boardservice.repository.ArticleCommentRepository;
 import com.example.boardservice.repository.ArticleRepository;
+import com.example.boardservice.repository.UserAccountRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +32,7 @@ class ArticleCommentServiceTest {
 
   @Mock private ArticleRepository articleRepository;
   @Mock private ArticleCommentRepository articleCommentRepository;
+  @Mock private UserAccountRepository userAccountRepository;
 
   @DisplayName("Return appropriate comment list when article ID is provided")
   @Test
@@ -54,11 +56,13 @@ class ArticleCommentServiceTest {
     //g
     ArticleCommentDto dto = createArticleCommentDto("Comment");
     given(articleRepository.getReferenceById(dto.articleId())).willReturn(createArticle());
+    given(userAccountRepository.getReferenceById(dto.userAccountDto().userId())).willReturn(createUserAccount());
     given(articleCommentRepository.save(any(ArticleComment.class))).willReturn(null);
     //w
     sut.saveArticleComment(dto);
     //t
     then(articleRepository).should().getReferenceById(dto.articleId());
+    then(userAccountRepository).should().getReferenceById(dto.userAccountDto().userId());
     then(articleCommentRepository).should().save(any(ArticleComment.class));
   }
   @DisplayName("Log warning when attempting to save comment but to article found")
@@ -73,6 +77,7 @@ class ArticleCommentServiceTest {
 
     // Then
     then(articleRepository).should().getReferenceById(dto.articleId());
+    then(userAccountRepository).shouldHaveNoInteractions();
     then(articleCommentRepository).shouldHaveNoInteractions();
   }
 

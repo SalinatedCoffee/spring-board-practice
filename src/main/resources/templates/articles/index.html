@@ -19,7 +19,7 @@
     <div class="row">
         <div class="card card-margin search-form">
             <div class="card-body p-0">
-                <form action="/articles" method="get">
+                <form id="search-form">
                     <div class="row">
                         <div class="col-12">
                             <div class="row no-gutters">
@@ -52,13 +52,14 @@
             </div>
         </div>
     </div>
+    <div class="row">
     <table class="table" id="article-table">
         <thead>
             <tr>
                 <th class="title col-6"><a>Title</a></th>
                 <th class="hashtag col-2"><a>Hashtag</a></th>
-                <th class="user-id col"><a>Author</a></th>
-                <th class="created-at col"><a>Timestamp</a></th>
+                <th class="user-id"><a>Author</a></th>
+                <th class="created-at"><a>Timestamp</a></th>
             </tr>
         </thead>
         <tbody>
@@ -82,6 +83,13 @@
         </tr>
         </tbody>
     </table>
+    </div>
+    <div class="row">
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a class="btn btn-primary me-md-2" role="button" id="write-article">Post</a>
+        </div>
+    </div>
+    <div class="row">
     <nav id="pagination" aria-label="Page navigation example">
         <ul class="pagination justify-content-center">
             <li class="page-item"><a class="page-link" href="#">Previous</a></li>
@@ -89,6 +97,7 @@
             <li class="page-item"><a class="page-link" href="#">Next</a></li>
         </ul>
     </nav>
+    </div>
 </main>
 
 <footer id="footer">

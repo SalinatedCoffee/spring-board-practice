@@ -36,10 +36,10 @@ public class ArticleController {
   ) {
     Page<ArticleResponse> articles = articleService.searchArticles(searchType, searchKeyword, pageable).map(ArticleResponse::from);
     List<Integer> barNumbers = paginationService.getPaginationBarNumbers(pageable.getPageNumber(), articles.getTotalPages());
+
     map.addAttribute("articles", articles);
     map.addAttribute("paginationBarNumbers", barNumbers);
     map.addAttribute("searchTypes", SearchType.values());
-
 
     return "articles/index";
   }
@@ -47,8 +47,10 @@ public class ArticleController {
   @GetMapping("/{articleId}")
   public String article(@PathVariable Long articleId, ModelMap map) {
     ArticleWithCommentsResponse article = ArticleWithCommentsResponse.from(articleService.getArticleWithComments(articleId));
+
     map.addAttribute("article", article);
     map.addAttribute("articleComments", article.articleCommentsResponse());
+    map.addAttribute("totalCount", articleService.getArticleCount());
 
     return "articles/detail";
   }
@@ -77,7 +79,7 @@ public class ArticleController {
 
   @PostMapping("/form")
   public String postNewArticle(ArticleRequest articleRequest) {
-    // TODO: 인증 정보를 넣어줘야 한다.
+    // TODO: Need to provide authentication credentials.
     articleService.saveArticle(articleRequest.toDto(UserAccountDto.of(
         "uno", "asdf1234", "uno@mail.com", "Uno", "memo"
     )));

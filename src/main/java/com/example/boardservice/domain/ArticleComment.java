@@ -25,7 +25,7 @@ public class ArticleComment extends AuditingFields {
   // can also be implemented without annotation, eg. private Long articleId
   // but best practice is to decouple and use annotation
   @Setter @ManyToOne(optional = false) private Article article;
-  @Setter @ManyToOne(optional = false) private UserAccount userAccount;
+  @Setter @ManyToOne(optional = false) @JoinColumn(name = "userId") private UserAccount userAccount;
   @Setter @Column(nullable = false, length = 500) private String content;
 
   protected ArticleComment() {}

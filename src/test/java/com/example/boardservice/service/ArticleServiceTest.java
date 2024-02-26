@@ -3,13 +3,13 @@ package com.example.boardservice.service;
 
 import com.example.boardservice.domain.Article;
 import com.example.boardservice.domain.UserAccount;
-import com.example.boardservice.domain.type.SearchType;
+import com.example.boardservice.domain.constant.SearchType;
 import com.example.boardservice.dto.ArticleDto;
 import com.example.boardservice.dto.ArticleWithCommentsDto;
 import com.example.boardservice.dto.UserAccountDto;
 import com.example.boardservice.repository.ArticleRepository;
+import com.example.boardservice.repository.UserAccountRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +34,7 @@ import static org.mockito.BDDMockito.*;
 public class ArticleServiceTest {
   @InjectMocks private ArticleService sut;
   @Mock private ArticleRepository articleRepository;
+  @Mock private UserAccountRepository userAccountRepository;
 
   @DisplayName("Return article page when searching without keyword")
   @Test
@@ -106,7 +107,7 @@ public class ArticleServiceTest {
     given(articleRepository.findById(articleId)).willReturn(Optional.of(article));
 
     // When
-    ArticleWithCommentsDto dto = sut.getArticle(articleId);
+    ArticleWithCommentsDto dto = sut.getArticleWithComments(articleId);
 
     // Then
     assertThat(dto)
@@ -141,12 +142,14 @@ public class ArticleServiceTest {
     // proceeding line written to explicitly outline mock db transaction,
     // in practice has little to no meaning
     ArticleDto dto = createArticleDto();
+    given(userAccountRepository.getReferenceById(dto.userAccountDto().userId())).willReturn(createUserAccount());
     given(articleRepository.save(any(Article.class))).willReturn(createArticle());
     //w
     // attempt to write row into db (in reality this operation never touches the persistence layer as we are mocking the db)
     sut.saveArticle(dto);
     //t
     // check whether db write has been requested
+    then(userAccountRepository).should().getReferenceById(dto.userAccountDto().userId());
     then(articleRepository).should().save(any(Article.class));
   }
 
@@ -159,7 +162,7 @@ public class ArticleServiceTest {
     given(articleRepository.getReferenceById(dto.id())).willReturn(article);
 
     // When
-    sut.updateArticle(dto);
+    sut.updateArticle(dto.id(), dto);
 
     // Then
     assertThat(article)
@@ -169,7 +172,7 @@ public class ArticleServiceTest {
     then(articleRepository).should().getReferenceById(dto.id());
   }
 
-  @DisplayName("Log warning when attempting to update nonexistant article")
+  @DisplayName("Log warning when attempting to update nonexistent article")
   @Test
   void givenNonexistentArticleInfo_whenUpdatingArticle_thenLogsWarningAndDoesNothing() {
     // Given
@@ -177,7 +180,7 @@ public class ArticleServiceTest {
     given(articleRepository.getReferenceById(dto.id())).willThrow(EntityNotFoundException.class);
 
     // When
-    sut.updateArticle(dto);
+    sut.updateArticle(dto.id(), dto);
 
     // Then
     then(articleRepository).should().getReferenceById(dto.id());

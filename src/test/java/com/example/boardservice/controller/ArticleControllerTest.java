@@ -1,16 +1,14 @@
 package com.example.boardservice.controller;
 
 import com.example.boardservice.config.SecurityConfig;
-import com.example.boardservice.domain.type.SearchType;
+import com.example.boardservice.domain.constant.SearchType;
 import com.example.boardservice.dto.ArticleWithCommentsDto;
 import com.example.boardservice.dto.UserAccountDto;
 import com.example.boardservice.service.ArticleService;
 import com.example.boardservice.service.PaginationService;
-import io.micrometer.core.instrument.search.Search;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -133,7 +131,7 @@ class ArticleControllerTest {
     Long articleId = 1L;
     // articleService, when given .getArticle(articleId), should return create...Dto().
     // so mock articleService accordingly
-    given(articleService.getArticle(articleId)).willReturn(createArticleWithCommentsDto());
+    given(articleService.getArticleWithComments(articleId)).willReturn(createArticleWithCommentsDto());
     // when & then
     mvc.perform(get("/articles/" + articleId))
         .andExpect(status().isOk())
@@ -141,7 +139,7 @@ class ArticleControllerTest {
         .andExpect(view().name("articles/detail"))
         .andExpect(model().attributeExists("article"))
         .andExpect(model().attributeExists("articleComments"));
-    then(articleService).should().getArticle(articleId);
+    then(articleService).should().getArticleWithComments(articleId);
   }
 
   @Disabled("Not yet implemented")

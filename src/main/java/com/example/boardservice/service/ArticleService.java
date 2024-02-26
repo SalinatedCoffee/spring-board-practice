@@ -1,11 +1,12 @@
 package com.example.boardservice.service;
 
 import com.example.boardservice.domain.Article;
-import com.example.boardservice.domain.type.SearchType;
+import com.example.boardservice.domain.UserAccount;
+import com.example.boardservice.domain.constant.SearchType;
 import com.example.boardservice.dto.ArticleDto;
 import com.example.boardservice.dto.ArticleWithCommentsDto;
 import com.example.boardservice.repository.ArticleRepository;
-import jakarta.persistence.Entity;
+import com.example.boardservice.repository.UserAccountRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ import java.util.List;
 @Service
 public class ArticleService {
   private final ArticleRepository articleRepository;
+  private final UserAccountRepository userAccountRepository;
   @Transactional(readOnly = true)
   public Page<ArticleDto> searchArticles(SearchType searchType, String searchKeyword, Pageable pageable) {
     if (searchKeyword == null || searchKeyword.isBlank()) {
@@ -42,19 +44,20 @@ public class ArticleService {
   }
 
   @Transactional(readOnly = true)
-  public ArticleWithCommentsDto getArticle(Long articleId) {
+  public ArticleWithCommentsDto getArticleWithComments(Long articleId) {
     return articleRepository.findById(articleId)
         .map(ArticleWithCommentsDto::from)
         .orElseThrow(() -> new EntityNotFoundException("Article does not exist - articleId: " + articleId));
   }
 
   public void saveArticle(ArticleDto dto) {
-    articleRepository.save(dto.toEntity());
+    UserAccount userAccount = userAccountRepository.getReferenceById(dto.userAccountDto().userId());
+    articleRepository.save(dto.toEntity(userAccount));
   }
 
-  public void updateArticle(ArticleDto dto) {
+  public void updateArticle(Long articleId, ArticleDto dto) {
     try {
-      Article article = articleRepository.getReferenceById(dto.id());
+      Article article = articleRepository.getReferenceById(articleId);
       // guard against null values for non-nullable fields
       if (dto.title() != null) {
         article.setTitle(dto.title());
@@ -87,5 +90,11 @@ public class ArticleService {
 
   public List<String> getHashtags() {
     return articleRepository.findAllDistinctHashtags();
+  }
+
+  public ArticleDto getArticle(Long articleId) {
+    return articleRepository.findById(articleId)
+        .map(ArticleDto::from)
+        .orElseThrow(() -> new EntityNotFoundException("Article does not exist - articleId: " + articleId));
   }
 }

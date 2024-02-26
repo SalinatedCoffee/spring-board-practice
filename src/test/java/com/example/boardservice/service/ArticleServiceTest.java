@@ -98,6 +98,43 @@ public class ArticleServiceTest {
     then(articleRepository).should().findByHashtag(hashtag, pageable);
   }
 
+
+  @DisplayName("Return article with comments when querying article id")
+  @Test
+  void givenArticleId_whenSearchingArticleWithComments_thenReturnsArticleWithComments() {
+    // Given
+    Long articleId = 1L;
+    Article article = createArticle();
+    given(articleRepository.findById(articleId)).willReturn(Optional.of(article));
+
+    // When
+    ArticleWithCommentsDto dto = sut.getArticleWithComments(articleId);
+
+    // Then
+    assertThat(dto)
+        .hasFieldOrPropertyWithValue("title", article.getTitle())
+        .hasFieldOrPropertyWithValue("content", article.getContent())
+        .hasFieldOrPropertyWithValue("hashtag", article.getHashtag());
+    then(articleRepository).should().findById(articleId);
+  }
+
+  @DisplayName("Throw exception when a comment's article does not exist")
+  @Test
+  void givenNonexistentArticleId_whenSearchingArticleWithComments_thenThrowsException() {
+    // Given
+    Long articleId = 0L;
+    given(articleRepository.findById(articleId)).willReturn(Optional.empty());
+
+    // When
+    Throwable t = catchThrowable(() -> sut.getArticleWithComments(articleId));
+
+    // Then
+    assertThat(t)
+        .isInstanceOf(EntityNotFoundException.class)
+        .hasMessage("Article does not exist - articleId: " + articleId);
+    then(articleRepository).should().findById(articleId);
+  }
+
   @DisplayName("Return article when requesting article")
   @Test
   void givenArticleId_whenSearchingArticle_thenReturnsArticle() {
@@ -117,7 +154,7 @@ public class ArticleServiceTest {
     then(articleRepository).should().findById(articleId);
   }
 
-  @DisplayName("Throw exception when requesting nonexistent article")
+  @DisplayName("Throw exception when article does not exist")
   @Test
   void givenNonexistentArticleId_whenSearchingArticle_thenThrowsException() {
     // Given
@@ -155,7 +192,7 @@ public class ArticleServiceTest {
 
   @DisplayName("Edit article when article ID and modified fields are provided")
   @Test
-  void givenArticleIdAndModifiedInfo_whenUpdatingArticle_thenUpdatesArticle() {
+  void givenModifiedArticleInfo_whenUpdatingArticle_thenUpdatesArticle() {
     // Given
     Article article = createArticle();
     ArticleDto dto = createArticleDto("New Title", "New Content", "#springboot");
@@ -198,6 +235,21 @@ public class ArticleServiceTest {
 
     // Then
     then(articleRepository).should().deleteById(articleId);
+  }
+
+  @DisplayName("Return number of articles when querying number of articles")
+  @Test
+  void givenNothing_whenCountingArticles_thenReturnsArticleCount() {
+    // Given
+    long expected = 0L;
+    given(articleRepository.count()).willReturn(expected);
+
+    // When
+    long actual = sut.getArticleCount();
+
+    // Then
+    assertThat(actual).isEqualTo(expected);
+    then(articleRepository).should().count();
   }
 
   @DisplayName("Return list of unique hashtags upon request")

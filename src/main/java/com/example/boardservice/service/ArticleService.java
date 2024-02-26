@@ -50,6 +50,20 @@ public class ArticleService {
         .orElseThrow(() -> new EntityNotFoundException("Article does not exist - articleId: " + articleId));
   }
 
+  @Transactional(readOnly = true)
+  public ArticleDto getArticle(Long articleId) {
+    return articleRepository.findById(articleId)
+        .map(ArticleDto::from)
+        .orElseThrow(() -> new EntityNotFoundException("Article does not exist - articleId: " + articleId));
+  }
+  @Transactional(readOnly = true)
+  public Page<ArticleDto> searchArticlesViaHashtag(String hashtag, Pageable pageable) {
+    if (hashtag == null || hashtag.isBlank()) {
+      return Page.empty(pageable);
+    }
+    return articleRepository.findByHashtag(hashtag, pageable).map(ArticleDto::from);
+  }
+
   public void saveArticle(ArticleDto dto) {
     UserAccount userAccount = userAccountRepository.getReferenceById(dto.userAccountDto().userId());
     articleRepository.save(dto.toEntity(userAccount));
@@ -80,21 +94,14 @@ public class ArticleService {
     articleRepository.deleteById(articleId);
   }
 
-  @Transactional(readOnly = true)
-  public Page<ArticleDto> searchArticlesViaHashtag(String hashtag, Pageable pageable) {
-    if (hashtag == null || hashtag.isBlank()) {
-      return Page.empty(pageable);
-    }
-    return articleRepository.findByHashtag(hashtag, pageable).map(ArticleDto::from);
-  }
+
 
   public List<String> getHashtags() {
     return articleRepository.findAllDistinctHashtags();
   }
 
-  public ArticleDto getArticle(Long articleId) {
-    return articleRepository.findById(articleId)
-        .map(ArticleDto::from)
-        .orElseThrow(() -> new EntityNotFoundException("Article does not exist - articleId: " + articleId));
+
+  public long getArticleCount() {
+    return articleRepository.count();
   }
 }

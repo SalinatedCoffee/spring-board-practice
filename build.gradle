@@ -38,6 +38,7 @@ dependencies {
     // add IDE-level documentation for custom-written Spring configuration fields (thymeleaf3)
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
 
     // queryDSL settings
     // version number is automatically managed by plugin io.spring.depend...agement, so can be omitted if it comes at end of line

@@ -12,7 +12,7 @@ import java.util.Set;
 
 // automatically generate getter/tostring methods for class variables (Lombok)
 @Getter
-@ToString
+@ToString(callSuper = true)
 // index these columns (JPA)
 @Table(indexes = {
     @Index(columnList = "title"),
@@ -41,7 +41,7 @@ public class Article extends AuditingFields {
 
   // don't generate tostring method for this field to avoid circular referencing between articlecomment
   @ToString.Exclude
-  @OrderBy("id")
+  @OrderBy("createdAt DESC")
   @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
   // @onetomany using generics (articlecomment), automatically links entities article and articlecomment
   private final Set<ArticleComment> articleComments = new LinkedHashSet<>();

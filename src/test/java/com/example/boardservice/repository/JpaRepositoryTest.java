@@ -6,15 +6,21 @@ import com.example.boardservice.domain.UserAccount;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.AuditorAware;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("JPA Connection tests")
-@Import(JpaConfig.class)
+@Import(JpaRepositoryTest.TestJpaConfig.class)
 // also enables transaction control for all test methods, will roll back any changes to before test
 @DataJpaTest
 class JpaRepositoryTest {
@@ -86,5 +92,16 @@ class JpaRepositoryTest {
     // then
     assertThat(articleRepository.count()).isEqualTo(previousArticleCount - 1);
     assertThat(articleCommentRepository.count()).isEqualTo(previousArticleCommentCount - deletedCommentsSize);
+  }
+
+  @EnableJpaAuditing
+  // only register bean during testing
+  @TestConfiguration
+  // replace JpaConfig's auditorAware config during test runs
+  public static class TestJpaConfig {
+    @Bean
+    public AuditorAware<String> auditorAware() {
+      return () -> Optional.of("uno");
+    }
   }
 }

@@ -72,26 +72,29 @@ public class ArticleService {
   public void updateArticle(Long articleId, ArticleDto dto) {
     try {
       Article article = articleRepository.getReferenceById(articleId);
-      // guard against null values for non-nullable fields
-      if (dto.title() != null) {
-        article.setTitle(dto.title());
+      UserAccount userAccount = userAccountRepository.getReferenceById(dto.userAccountDto().userId());
+
+      if (article.getUserAccount().equals(userAccount)) {// guard against null values for non-nullable fields
+        if (dto.title() != null) {
+          article.setTitle(dto.title());
+        }
+        if (dto.content() != null) {
+          article.setContent(dto.content());
+        }
+        article.setHashtag(dto.hashtag());
+        // no need for articleRepository.save(article); since ArticleService is annotated with @Transactional
+        // changes to entity will be detected automatically and necessary queries will be sent to persistence
+        // layer accordingly
       }
-      if (dto.content() != null) {
-        article.setContent(dto.content());
-      }
-      article.setHashtag(dto.hashtag());
-      // no need for articleRepository.save(article); since ArticleService is annotated with @Transactional
-      // changes to entity will be detected automatically and necessary queries will be sent to persistence
-      // layer accordingly
     }
     catch (EntityNotFoundException e) {
       // @Slf4j
-      log.warn("Failed to update article: article not found - dto: {}", dto);
+      log.warn("Failed to update article: information required to update article not found - {}", e.getLocalizedMessage());
     }
   }
 
-  public void deleteArticle(Long articleId) {
-    articleRepository.deleteById(articleId);
+  public void deleteArticle(Long articleId, String userId) {
+    articleRepository.deleteByIdAndUserAccount_UserId(articleId, userId);
   }
 
 

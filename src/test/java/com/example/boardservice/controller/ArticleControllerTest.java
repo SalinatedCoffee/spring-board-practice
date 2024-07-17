@@ -1,6 +1,7 @@
 package com.example.boardservice.controller;
 
 import com.example.boardservice.config.SecurityConfig;
+import com.example.boardservice.config.TestSecurityConfig;
 import com.example.boardservice.domain.constant.FormStatus;
 import com.example.boardservice.domain.constant.SearchType;
 import com.example.boardservice.dto.ArticleDto;
@@ -23,6 +24,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.TestExecutionEvent;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -38,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("View controller: articles")
 // configure tests to go through spring security
-@Import({SecurityConfig.class, FormDataEncoder.class})
+@Import({TestSecurityConfig.class, FormDataEncoder.class})
 // only load relevant bean
 @WebMvcTest(ArticleController.class)
 class ArticleControllerTest {
@@ -129,7 +133,21 @@ class ArticleControllerTest {
     then(paginationService).should().getPaginationBarNumbers(pageable.getPageNumber(), Page.empty().getTotalPages());
   }
 
-  @DisplayName("[View][GET] Single article page - normal call")
+  @DisplayName("[View][GET] Single article page - redirect to login page when not authenticated")
+  @Test
+  public void givenNothing_whenRequestingArticlePage_thenRedirectsToLoginPage() throws Exception {
+    // given
+    long articleId = 1L;
+    // when & then
+    mvc.perform(get("/articles/" + articleId))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrlPattern("**/login"));
+    then(articleService).shouldHaveNoInteractions();
+    then(articleService).shouldHaveNoInteractions();
+  }
+
+  @WithMockUser 
+  @DisplayName("[View][GET] Single article page - normal call when authenticated")
   @Test
   public void givenNothing_whenRequestingArticleView_thenReturnsArticleView() throws Exception {
     // given
@@ -203,7 +221,8 @@ class ArticleControllerTest {
     then(paginationService).should().getPaginationBarNumbers(anyInt(), anyInt());
   }
 
-
+  // just need to mock authenticated user, doesn't necessarily need to be in database
+  @WithMockUser
   @DisplayName("[View][GET] Post new article page")
   @Test
   void givenNothing_whenRequesting_thenReturnsNewArticlePage() throws Exception {
@@ -216,7 +235,11 @@ class ArticleControllerTest {
         .andExpect(view().name("articles/form"))
         .andExpect(model().attribute("formStatus", FormStatus.CREATE));
   }
-
+  // code that is being tested needs information about an authenticated user actually in database
+  // so mock that user using @WithUserDetails
+  // also specify when the mock should be set up
+  // notice that the user 'unoTest' has been mocked inside TestSecurityConfig, and doesn't actually exist in the mysql db
+  @WithUserDetails(value = "unoTest", setupBefore = TestExecutionEvent.TEST_EXECUTION)
   @DisplayName("[View][POST] Register new article - normal call")
   @Test
   void givenNewArticleInfo_whenRequesting_thenSavesNewArticle() throws Exception {
@@ -237,7 +260,21 @@ class ArticleControllerTest {
     then(articleService).should().saveArticle(any(ArticleDto.class));
   }
 
-  @DisplayName("[View][GET] Edit article page")
+  @DisplayName("[View][GET] Edit article page redirects to login page when not authenticated")
+  @Test
+  void givenNothing_whenRequesting_thenRedirectsToLoginPage() throws Exception {
+    // Given
+    long articleId = 1L;
+
+    // When & Then
+    mvc.perform(get("/articles/" + articleId + "/form"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrlPattern("**/login"));
+    then(articleService).shouldHaveNoInteractions();
+  }
+
+  @WithUserDetails(value = "unoTest", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+  @DisplayName("[View][GET] Edit article page when authenticated")
   @Test
   void givenNothing_whenRequesting_thenReturnsUpdatedArticlePage() throws Exception {
     // Given
@@ -255,7 +292,8 @@ class ArticleControllerTest {
     then(articleService).should().getArticle(articleId);
   }
 
-  @DisplayName("[View][POST] Edit (update) article - normal call")
+  @WithUserDetails(value = "unoTest", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+  @DisplayName("[View][POST] Edit (update) article - normal call when authenticated")
   @Test
   void givenUpdatedArticleInfo_whenRequesting_thenUpdatesNewArticle() throws Exception {
     // Given
@@ -276,12 +314,14 @@ class ArticleControllerTest {
     then(articleService).should().updateArticle(eq(articleId), any(ArticleDto.class));
   }
 
-  @DisplayName("[View][POST] Delete article - normal call")
+  @WithUserDetails(value = "unoTest", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+  @DisplayName("[View][POST] Delete article - normal call when authenticated ")
   @Test
   void givenArticleIdToDelete_whenRequesting_thenDeletesArticle() throws Exception {
     // Given
     long articleId = 1L;
-    willDoNothing().given(articleService).deleteArticle(articleId);
+    String userId = "unoTest";
+    willDoNothing().given(articleService).deleteArticle(articleId, userId);
 
     // When & Then
     mvc.perform(
@@ -292,7 +332,7 @@ class ArticleControllerTest {
         .andExpect(status().is3xxRedirection())
         .andExpect(view().name("redirect:/articles"))
         .andExpect(redirectedUrl("/articles"));
-    then(articleService).should().deleteArticle(articleId);
+    then(articleService).should().deleteArticle(articleId, userId);
   }
 
 

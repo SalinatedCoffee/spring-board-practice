@@ -1,6 +1,7 @@
 package com.example.boardservice.controller;
 
 import com.example.boardservice.config.SecurityConfig;
+import com.example.boardservice.config.TestSecurityConfig;
 import com.example.boardservice.dto.ArticleCommentDto;
 import com.example.boardservice.dto.request.ArticleCommentRequest;
 import com.example.boardservice.service.ArticleCommentService;
@@ -12,6 +13,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.TestExecutionEvent;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Map;
@@ -26,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("View controller: article comments")
 // configure tests to go through spring security
-@Import({SecurityConfig.class, FormDataEncoder.class})
+@Import({TestSecurityConfig.class, FormDataEncoder.class})
 // only load relevant bean
 @WebMvcTest(ArticleCommentController.class)
 class ArticleCommentControllerTest {
@@ -40,11 +43,13 @@ class ArticleCommentControllerTest {
     this.formDataEncoder = formDataEncoder;
   }
 
-  @DisplayName("[View][POST] Post comment - normal call")
+  @WithUserDetails(value = "unoTest", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+  @DisplayName("[View][POST] Post comment - normal call when authenticated")
   @Test
   void givenArticleCommentInfo_whenRequesting_thenSavesNewArticleComment() throws Exception {
     // Given
     long articleId = 1L;
+    String userId = "unoTest";
     ArticleCommentRequest request = ArticleCommentRequest.of(articleId, "test comment");
     willDoNothing().given(articleCommentService).saveArticleComment(any(ArticleCommentDto.class));
 
@@ -61,13 +66,15 @@ class ArticleCommentControllerTest {
     then(articleCommentService).should().saveArticleComment(any(ArticleCommentDto.class));
   }
 
-  @DisplayName("[View][GET] Delete comment - normal call")
+  @WithUserDetails(value = "unoTest", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+  @DisplayName("[View][GET] Delete comment - normal call when authenticated")
   @Test
   void givenArticleCommentIdToDelete_whenRequesting_thenDeletesArticleComment() throws Exception {
     // Given
     long articleId = 1L;
     long articleCommentId = 1L;
-    willDoNothing().given(articleCommentService).deleteArticleComment(articleCommentId);
+    String userId = "unoTest";
+    willDoNothing().given(articleCommentService).deleteArticleComment(articleCommentId, userId);
 
     // When & Then
     mvc.perform(
@@ -79,7 +86,7 @@ class ArticleCommentControllerTest {
         .andExpect(status().is3xxRedirection())
         .andExpect(view().name("redirect:/articles/" + articleId))
         .andExpect(redirectedUrl("/articles/" + articleId));
-    then(articleCommentService).should().deleteArticleComment(articleCommentId);
+    then(articleCommentService).should().deleteArticleComment(articleCommentId, userId);
   }
 
 

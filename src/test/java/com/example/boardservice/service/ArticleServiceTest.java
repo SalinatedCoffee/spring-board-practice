@@ -31,7 +31,7 @@ import static org.mockito.BDDMockito.*;
 // lightweight testing without going through Spring's built-in frameworks
 @DisplayName("Business logic - Article")
 @ExtendWith(MockitoExtension.class)
-public class ArticleServiceTest {
+public class  ArticleServiceTest {
   @InjectMocks private ArticleService sut;
   @Mock private ArticleRepository articleRepository;
   @Mock private UserAccountRepository userAccountRepository;
@@ -197,6 +197,7 @@ public class ArticleServiceTest {
     Article article = createArticle();
     ArticleDto dto = createArticleDto("New Title", "New Content", "#springboot");
     given(articleRepository.getReferenceById(dto.id())).willReturn(article);
+    given(userAccountRepository.getReferenceById(dto.userAccountDto().userId())).willReturn(dto.userAccountDto().toEntity());
 
     // When
     sut.updateArticle(dto.id(), dto);
@@ -207,6 +208,7 @@ public class ArticleServiceTest {
         .hasFieldOrPropertyWithValue("content", dto.content())
         .hasFieldOrPropertyWithValue("hashtag", dto.hashtag());
     then(articleRepository).should().getReferenceById(dto.id());
+    then(userAccountRepository).should().getReferenceById(dto.userAccountDto().userId());
   }
 
   @DisplayName("Log warning when attempting to update nonexistent article")
@@ -228,13 +230,14 @@ public class ArticleServiceTest {
   void givenArticleId_whenDeletingArticle_thenDeletesArticle() {
     // Given
     Long articleId = 1L;
-    willDoNothing().given(articleRepository).deleteById(articleId);
+    String userId = "uno";
+    willDoNothing().given(articleRepository).deleteByIdAndUserAccount_UserId(articleId, userId);
 
     // When
-    sut.deleteArticle(1L);
+    sut.deleteArticle(1L, userId);
 
     // Then
-    then(articleRepository).should().deleteById(articleId);
+    then(articleRepository).should().deleteByIdAndUserAccount_UserId(articleId, userId );
   }
 
   @DisplayName("Return number of articles when querying number of articles")

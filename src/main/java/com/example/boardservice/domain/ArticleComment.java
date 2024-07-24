@@ -44,11 +44,11 @@ public class ArticleComment extends AuditingFields {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof ArticleComment articleComment)) return false;
-    return id != null && id.equals(articleComment.id);
+    return this.getId() != null && this.getId().equals(articleComment.id);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id);
+    return Objects.hash(this.getId());
   }
 }

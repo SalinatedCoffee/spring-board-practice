@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
 // what are services anyway, and what logic should live in the service layer?
@@ -39,7 +40,8 @@ public class ArticleService {
       case CONTENT -> articleRepository.findByContentContaining(searchKeyword, pageable).map(ArticleDto::from);
       case ID -> articleRepository.findByUserAccount_UserIdContaining(searchKeyword, pageable).map(ArticleDto::from);
       case NICKNAME -> articleRepository.findByUserAccount_NicknameContaining(searchKeyword, pageable).map(ArticleDto::from);
-      case HASHTAG -> articleRepository.findByHashtag('#'+searchKeyword, pageable).map(ArticleDto::from);
+      case HASHTAG -> articleRepository.findByHashtagNames(Arrays.stream(searchKeyword.split(" ")).toList(), pageable)
+          .map(ArticleDto::from);
     };
   }
 
@@ -61,7 +63,7 @@ public class ArticleService {
     if (hashtag == null || hashtag.isBlank()) {
       return Page.empty(pageable);
     }
-    return articleRepository.findByHashtag(hashtag, pageable).map(ArticleDto::from);
+    return articleRepository.findByHashtagNames(null, pageable).map(ArticleDto::from);
   }
 
   public void saveArticle(ArticleDto dto) {
@@ -81,7 +83,7 @@ public class ArticleService {
         if (dto.content() != null) {
           article.setContent(dto.content());
         }
-        article.setHashtag(dto.hashtag());
+//        article.setHashtag(dto.hashtag()); TODO
         // no need for articleRepository.save(article); since ArticleService is annotated with @Transactional
         // changes to entity will be detected automatically and necessary queries will be sent to persistence
         // layer accordingly

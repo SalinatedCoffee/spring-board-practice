@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.apache.catalina.User;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -16,7 +17,6 @@ import java.util.Set;
 // index these columns (JPA)
 @Table(indexes = {
     @Index(columnList = "title"),
-    @Index(columnList = "hashtag"),
     // note how inherited columns can directly be designated for indexing here
     @Index(columnList = "createdAt"),
     @Index(columnList = "createdBy")
@@ -37,7 +37,22 @@ public class Article extends AuditingFields {
   @Setter @Column(nullable = false) private String title;
   @Setter @Column(nullable = false, length = 10000) private String content;
 
-  @Setter private String hashtag;
+  @ToString.Exclude
+  // in article-hashtag relationship, we want to make article own the relationship
+  // so use annotation @JoinTable
+  // what does it mean to 'own' a relationship?
+  // read: https://www.javacodegeeks.com/2013/04/jpa-determining-the-owning-side-of-a-relationship.html
+  // or https://stackoverflow.com/questions/2749689/what-is-the-owning-side-in-an-orm-mapping
+  // or https://stackoverflow.com/questions/21985308/how-is-the-owning-side-of-this-many-to-many-relationship-determined
+  // tl;dr: relates to the side of the relation that 'owns' the foreign key in database
+  @JoinTable(
+      // specify table and column names instead of having jakarta auto-generate them
+      name = "article_hashtag",
+      joinColumns = @JoinColumn(name = "articleId"),
+      inverseJoinColumns = @JoinColumn(name = "hashtagId")
+  )
+  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  private Set<Hashtag> hashtags = new LinkedHashSet<>();
 
   // don't generate tostring method for this field to avoid circular referencing between articlecomment
   @ToString.Exclude
@@ -50,18 +65,29 @@ public class Article extends AuditingFields {
   // a no-param protected or public constructor is required by framework
   protected Article() {}
 
-  private Article(UserAccount userAccount, String title, String content, String hashtag) {
+  private Article(UserAccount userAccount, String title, String content) {
     this.userAccount = userAccount;
     this.title = title;
     this.content = content;
-    this.hashtag = hashtag;
   }
 
   // factory constructor
   // of is shorthand for method name
   // https://stackoverflow.com/questions/48256270/what-does-the-naming-convention-of-mean-in-java
-  public static Article of(UserAccount userAccount, String title, String content, String hashtag) {
-    return new Article(userAccount, title, content, hashtag);
+  public static Article of(UserAccount userAccount, String title, String content) {
+    return new Article(userAccount, title, content);
+  }
+
+  public void addHashtag(Hashtag hashtag) {
+    this.getHashtags().add(hashtag);
+  }
+
+  public void addHashtags(Collection<Hashtag> hashtags) {
+    this.getHashtags().addAll(hashtags);
+  }
+
+  public void clearHashtags() {
+    this.getHashtags().clear();
   }
 
   // if article has not been given an id (null) by the database

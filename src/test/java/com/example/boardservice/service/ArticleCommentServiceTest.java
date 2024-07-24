@@ -2,6 +2,7 @@ package com.example.boardservice.service;
 
 import com.example.boardservice.domain.Article;
 import com.example.boardservice.domain.ArticleComment;
+import com.example.boardservice.domain.Hashtag;
 import com.example.boardservice.domain.UserAccount;
 import com.example.boardservice.dto.ArticleCommentDto;
 import com.example.boardservice.dto.UserAccountDto;
@@ -19,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -149,7 +151,7 @@ class ArticleCommentServiceTest {
         "password",
         "uno@mail.com",
         "Uno",
-        "This is memo",
+        "This is a memo",
         LocalDateTime.now(),
         "uno",
         LocalDateTime.now(),
@@ -159,7 +161,7 @@ class ArticleCommentServiceTest {
 
   private ArticleComment createArticleComment(String content) {
     return ArticleComment.of(
-        Article.of(createUserAccount(), "title", "content", "hashtag"),
+        createArticle(),
         createUserAccount(),
         content
     );
@@ -176,11 +178,17 @@ class ArticleCommentServiceTest {
   }
 
   private Article createArticle() {
-    return Article.of(
+    Article article = Article.of(
         createUserAccount(),
         "title",
-        "content",
-        "#java"
+        "content"
     );
+    article.addHashtags(Set.of(createHashtag(article)));
+
+    return article;
+  }
+
+  private Hashtag createHashtag(Article article) {
+    return Hashtag.of("java");
   }
 }

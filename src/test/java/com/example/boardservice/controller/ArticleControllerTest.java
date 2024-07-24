@@ -6,6 +6,7 @@ import com.example.boardservice.domain.constant.FormStatus;
 import com.example.boardservice.domain.constant.SearchType;
 import com.example.boardservice.dto.ArticleDto;
 import com.example.boardservice.dto.ArticleWithCommentsDto;
+import com.example.boardservice.dto.HashtagDto;
 import com.example.boardservice.dto.UserAccountDto;
 import com.example.boardservice.dto.request.ArticleRequest;
 import com.example.boardservice.dto.response.ArticleResponse;
@@ -73,7 +74,9 @@ class ArticleControllerTest {
         .andExpect(view().name("articles/index"))
         .andExpect(model().attributeExists("articles"))
         .andExpect(model().attributeExists("paginationBarNumbers"))
-        .andExpect(model().attributeExists("searchTypes"));
+        .andExpect(model().attributeExists("searchTypes"))
+        .andExpect(model().attribute("searchTypeHashtag", SearchType.HASHTAG));
+
     then(articleService).should().searchArticles(eq(null), eq(null), any(Pageable.class));
     then(paginationService).should().getPaginationBarNumbers(anyInt(), anyInt());
   }
@@ -146,23 +149,27 @@ class ArticleControllerTest {
     then(articleService).shouldHaveNoInteractions();
   }
 
-  @WithMockUser 
-  @DisplayName("[View][GET] Single article page - normal call when authenticated")
+  @WithMockUser
+  @DisplayName("[view][GET] Single article page - normal call with authenticated")
   @Test
-  public void givenNothing_whenRequestingArticleView_thenReturnsArticleView() throws Exception {
-    // given
+  void givenAuthorizedUser_whenRequestingArticleView_thenReturnsArticleView() throws Exception {
+    // Given
     Long articleId = 1L;
-    // articleService, when given .getArticle(articleId), should return create...Dto().
-    // so mock articleService accordingly
+    long totalCount = 1L;
     given(articleService.getArticleWithComments(articleId)).willReturn(createArticleWithCommentsDto());
-    // when & then
+    given(articleService.getArticleCount()).willReturn(totalCount);
+
+    // When & Then
     mvc.perform(get("/articles/" + articleId))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
         .andExpect(view().name("articles/detail"))
         .andExpect(model().attributeExists("article"))
-        .andExpect(model().attributeExists("articleComments"));
+        .andExpect(model().attributeExists("articleComments"))
+        .andExpect(model().attribute("totalCount", totalCount))
+        .andExpect(model().attribute("searchTypeHashtag", SearchType.HASHTAG));
     then(articleService).should().getArticleWithComments(articleId);
+    then(articleService).should().getArticleCount();
   }
 
   @Disabled("Not yet implemented")
@@ -176,6 +183,7 @@ class ArticleControllerTest {
         .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
         .andExpect(view().name("articles/search"));
   }
+
 
   @DisplayName("[View][GET] Article hashtag search page - normal call")
   @Test
@@ -235,6 +243,7 @@ class ArticleControllerTest {
         .andExpect(view().name("articles/form"))
         .andExpect(model().attribute("formStatus", FormStatus.CREATE));
   }
+
   // code that is being tested needs information about an authenticated user actually in database
   // so mock that user using @WithUserDetails
   // also specify when the mock should be set up
@@ -244,7 +253,7 @@ class ArticleControllerTest {
   @Test
   void givenNewArticleInfo_whenRequesting_thenSavesNewArticle() throws Exception {
     // Given
-    ArticleRequest articleRequest = ArticleRequest.of("new title", "new content", "#new");
+    ArticleRequest articleRequest = ArticleRequest.of("new title", "new content");
     willDoNothing().given(articleService).saveArticle(any(ArticleDto.class));
 
     // When & Then
@@ -273,10 +282,10 @@ class ArticleControllerTest {
     then(articleService).shouldHaveNoInteractions();
   }
 
-  @WithUserDetails(value = "unoTest", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-  @DisplayName("[View][GET] Edit article page when authenticated")
+  @WithMockUser
+  @DisplayName("[view][GET] Update article page - normal call when authenticated")
   @Test
-  void givenNothing_whenRequesting_thenReturnsUpdatedArticlePage() throws Exception {
+  void givenAuthorizedUser_whenRequesting_thenReturnsUpdatedArticlePage() throws Exception {
     // Given
     long articleId = 1L;
     ArticleDto dto = createArticleDto();
@@ -298,7 +307,7 @@ class ArticleControllerTest {
   void givenUpdatedArticleInfo_whenRequesting_thenUpdatesNewArticle() throws Exception {
     // Given
     long articleId = 1L;
-    ArticleRequest articleRequest = ArticleRequest.of("new title", "new content", "#new");
+    ArticleRequest articleRequest = ArticleRequest.of("new title", "new content");
     willDoNothing().given(articleService).updateArticle(eq(articleId), any(ArticleDto.class));
 
     // When & Then
@@ -341,7 +350,7 @@ class ArticleControllerTest {
         createUserAccountDto(),
         "title",
         "content",
-        "#java"
+        Set.of(HashtagDto.of("java"))
     );
   }
 
@@ -352,7 +361,7 @@ class ArticleControllerTest {
         Set.of(),
         "title",
         "content",
-        "#java",
+        Set.of(HashtagDto.of("java")),
         LocalDateTime.now(),
         "uno",
         LocalDateTime.now(),

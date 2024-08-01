@@ -226,7 +226,7 @@ public class  ArticleServiceTest {
 
     // Then
     then(userAccountRepository).should().getReferenceById(dto.userAccountDto().userId());
-    then(hashtagService).should().parseHashtagNames(dto.content());
+     then(hashtagService).should().parseHashtagNames(dto.content());
     then(hashtagService).should().findHashtagsByNames(expectedHashtagNames);
     then(articleRepository).should().save(any(Article.class));
   }

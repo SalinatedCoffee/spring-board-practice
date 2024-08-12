@@ -2,8 +2,10 @@ package com.example.boardservice.repository;
 
 import com.example.boardservice.config.JpaConfig;
 import com.example.boardservice.domain.Article;
+import com.example.boardservice.domain.ArticleComment;
 import com.example.boardservice.domain.Hashtag;
 import com.example.boardservice.domain.UserAccount;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,6 +142,50 @@ class JpaRepositoryTest {
         .containsExactly("fuscia");
     assertThat(articlePage.getTotalElements()).isEqualTo(17);
     assertThat(articlePage.getTotalPages()).isEqualTo(4);
+  }
+
+  @DisplayName("Test querying of child comments")
+  @Test
+  void givenParentCommentId_whenSelecting_thenReturnsChildComments() {
+    // g
+    // w
+    Optional<ArticleComment> parentComment = articleCommentRepository.findById(1L);
+    // t
+    assertThat(parentComment).get()
+        .hasFieldOrPropertyWithValue("parentCommentId", null)
+        .extracting("childComments", InstanceOfAssertFactories.COLLECTION)
+        .hasSize(4);
+  }
+
+  @DisplayName("Test cascading deletion of child comments upon deleting parent comment, with comment id and user id")
+  @Test
+  void givenArticleCommentIdHavingChildCommentsAndUserId_whenDeletingParentComment_thenDeletesEveryComment() {
+    // g
+    long previousArticleCommentCount = articleCommentRepository.count();
+    // w
+    articleCommentRepository.deleteByIdAndUserAccount_UserId(1L, "uno");
+    // t
+    assertThat(articleCommentRepository.count()).isEqualTo(previousArticleCommentCount - 5);
+  }
+
+  @DisplayName("Test adding child comment to comment")
+  @Test
+  void givenParentComment_whenSaving_thenInsertsChildComment() {
+    // g
+    ArticleComment parentComment = articleCommentRepository.getReferenceById(1L);
+    ArticleComment childComment = ArticleComment.of(
+        parentComment.getArticle(),
+        parentComment.getUserAccount(),
+        "Child comment"
+    );
+    // w
+    parentComment.addChildComment(childComment);
+    articleCommentRepository.flush();
+    // t
+    assertThat(articleCommentRepository.findById(1L)).get()
+        .hasFieldOrPropertyWithValue("parentCommentId", null)
+        .extracting("childComments", InstanceOfAssertFactories.COLLECTION)
+        .hasSize(5);
   }
 
   @EnableJpaAuditing

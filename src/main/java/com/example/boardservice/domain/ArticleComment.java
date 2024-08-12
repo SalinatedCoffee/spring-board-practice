@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Getter
-@ToString
+@ToString(callSuper = true)
 // index these columns (JPA)
 @Table(indexes = {
     @Index(columnList = "content"),
@@ -31,8 +31,8 @@ public class ArticleComment extends AuditingFields {
   private Article article;
 
   @Setter
-  @ManyToOne(optional = false)
   @JoinColumn(name = "userId")
+  @ManyToOne(optional = false)
   private UserAccount userAccount;
 
   @Setter
@@ -61,10 +61,6 @@ public class ArticleComment extends AuditingFields {
     return new ArticleComment(article, userAccount, null, content);
   }
 
-  public static ArticleComment of(Article article, UserAccount userAccount, Long parentCommentId, String content) {
-    return new ArticleComment(article, userAccount, parentCommentId, content);
-  }
-
   public void addChildComment(ArticleComment child) {
     child.setParentCommentId(this.getId());
     this.getChildComments().add(child);
@@ -73,8 +69,8 @@ public class ArticleComment extends AuditingFields {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof ArticleComment articleComment)) return false;
-    return this.getId() != null && this.getId().equals(articleComment.id);
+    if (!(o instanceof ArticleComment that)) return false;
+    return this.getId() != null && this.getId().equals(that.getId());
   }
 
   @Override

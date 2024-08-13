@@ -1,6 +1,5 @@
 package com.example.boardservice.controller;
 
-import com.example.boardservice.config.SecurityConfig;
 import com.example.boardservice.config.TestSecurityConfig;
 import com.example.boardservice.dto.ArticleCommentDto;
 import com.example.boardservice.dto.request.ArticleCommentRequest;
@@ -20,8 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -49,7 +47,6 @@ class ArticleCommentControllerTest {
   void givenArticleCommentInfo_whenRequesting_thenSavesNewArticleComment() throws Exception {
     // Given
     long articleId = 1L;
-    String userId = "unoTest";
     ArticleCommentRequest request = ArticleCommentRequest.of(articleId, "test comment");
     willDoNothing().given(articleCommentService).saveArticleComment(any(ArticleCommentDto.class));
 
@@ -87,6 +84,27 @@ class ArticleCommentControllerTest {
         .andExpect(view().name("redirect:/articles/" + articleId))
         .andExpect(redirectedUrl("/articles/" + articleId));
     then(articleCommentService).should().deleteArticleComment(articleCommentId, userId);
+  }
+
+  @WithUserDetails(value = "unoTest", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+  @DisplayName("[View][POST] Post child comment - normal call when authenticated")
+  @Test
+  void givenArticleCommentInfoWithParentCommentId_whenRequesting_thenSavesNewChildComment() throws Exception {
+    // given
+    long articleId = 1L;
+    ArticleCommentRequest request = ArticleCommentRequest.of(articleId, 1L, "test child comment");
+    willDoNothing().given(articleCommentService).saveArticleComment(any(ArticleCommentDto.class));
+    // when & then
+    mvc.perform(
+        post("/comments/new")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .content(formDataEncoder.encode(request))
+            .with(csrf())
+        )
+        .andExpect(status().is3xxRedirection())
+        .andExpect(view().name("redirect:/articles/" + articleId))
+        .andExpect(redirectedUrl("/articles/" + articleId));
+    then(articleCommentService).should().saveArticleComment(any(ArticleCommentDto.class));
   }
 
 

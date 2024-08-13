@@ -17,12 +17,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
@@ -41,14 +43,23 @@ class ArticleCommentServiceTest {
   void givenArticleId_whenSearchingArticleComments_thenReturnsComments() {
     //g
     Long articleId = 1L;
-    ArticleComment expected = createArticleComment("content");
-    given(articleCommentRepository.findByArticle_Id(articleId)).willReturn(List.of(expected));
+    ArticleComment expectedParentComment = createArticleComment(1L, "Parent");
+    ArticleComment expectedChildComment = createArticleComment(2L, "Child");
+    expectedChildComment.setParentCommentId(expectedParentComment.getId());
+    given(articleCommentRepository.findByArticle_Id(articleId)).willReturn(List.of(
+        expectedParentComment,
+        expectedChildComment
+    ));
     //w
     List<ArticleCommentDto> actual  = sut.searchArticleComments(articleId);
     //t
+    assertThat(actual).hasSize(2);
     assertThat(actual)
-        .hasSize(1)
-        .first().hasFieldOrPropertyWithValue("content", expected.getContent());
+        .extracting("id", "articleId", "parentCommentId", "content")
+        .containsExactlyInAnyOrder(
+            tuple(1L, 1L, null, "Parent"),
+            tuple(2L, 1L, 1L, "Child")
+        );
     then(articleCommentRepository).should().findByArticle_Id(articleId);
   }
 
@@ -65,9 +76,10 @@ class ArticleCommentServiceTest {
     //t
     then(articleRepository).should().getReferenceById(dto.articleId());
     then(userAccountRepository).should().getReferenceById(dto.userAccountDto().userId());
+    then(articleCommentRepository).should(never()).getReferenceById(anyLong());
     then(articleCommentRepository).should().save(any(ArticleComment.class));
   }
-  @DisplayName("Log warning when attempting to save comment but to article found")
+  @DisplayName("Log warning when attempting to save comment but no article found")
   @Test
   void givenNonexistentArticle_whenSavingArticleComment_thenLogsSituationAndDoesNothing() {
     // Given
@@ -81,40 +93,6 @@ class ArticleCommentServiceTest {
     then(articleRepository).should().getReferenceById(dto.articleId());
     then(userAccountRepository).shouldHaveNoInteractions();
     then(articleCommentRepository).shouldHaveNoInteractions();
-  }
-
-  @DisplayName("Update comment when fields are provided")
-  @Test
-  void givenArticleCommentInfo_whenUpdatingArticleComment_thenUpdatesArticleComment() {
-    // Given
-    String oldContent = "content";
-    String updatedContent = "Comment";
-    ArticleComment articleComment = createArticleComment(oldContent);
-    ArticleCommentDto dto = createArticleCommentDto(updatedContent);
-    given(articleCommentRepository.getReferenceById(dto.id())).willReturn(articleComment);
-
-    // When
-    sut.updateArticleComment(dto);
-
-    // Then
-    assertThat(articleComment.getContent())
-        .isNotEqualTo(oldContent)
-        .isEqualTo(updatedContent);
-    then(articleCommentRepository).should().getReferenceById(dto.id());
-  }
-
-  @DisplayName("Log warning when attempting to update nonexistent comment")
-  @Test
-  void givenNonexistentArticleComment_whenUpdatingArticleComment_thenLogsWarningAndDoesNothing() {
-    // Given
-    ArticleCommentDto dto = createArticleCommentDto("Comment");
-    given(articleCommentRepository.getReferenceById(dto.id())).willThrow(EntityNotFoundException.class);
-
-    // When
-    sut.updateArticleComment(dto);
-
-    // Then
-    then(articleCommentRepository).should().getReferenceById(dto.id());
   }
 
   @DisplayName("Delete comment when comment id is provided")
@@ -132,11 +110,43 @@ class ArticleCommentServiceTest {
     then(articleCommentRepository).should().deleteByIdAndUserAccount_UserId(articleCommentId, userId);
   }
 
+  @DisplayName("Save child comment when given the comment id of its parent and its content")
+  @Test
+  void givenParentCommentIdAndArticleCommentInfo_whenSaving_thenSavesChildComment() {
+    // Given
+    Long parentCommentId = 1L;
+    ArticleComment parent = createArticleComment(parentCommentId, "Comment");
+    ArticleCommentDto child = createArticleCommentDto(parentCommentId, "Child comment");
+    given(articleRepository.getReferenceById(child.articleId())).willReturn(createArticle());
+    given(userAccountRepository.getReferenceById(child.userAccountDto().userId())).willReturn(createUserAccount());
+    given(articleCommentRepository.getReferenceById(child.parentCommentId())).willReturn(parent);
+
+    // When
+    sut.saveArticleComment(child);
+
+    // Then
+    assertThat(child.parentCommentId()).isNotNull();
+    then(articleRepository).should().getReferenceById(child.articleId());
+    then(userAccountRepository).should().getReferenceById(child.userAccountDto().userId());
+    then(articleCommentRepository).should().getReferenceById(child.parentCommentId());
+    then(articleCommentRepository).should(never()).save(any(ArticleComment.class));
+  }
+
+
   private ArticleCommentDto createArticleCommentDto(String content) {
+    return createArticleCommentDto(null, content);
+  }
+
+  private ArticleCommentDto createArticleCommentDto(Long parentCommentId, String content) {
+    return createArticleCommentDto(1L, parentCommentId, content);
+  }
+
+  private ArticleCommentDto createArticleCommentDto(Long id, Long parentCommentId, String content) {
     return ArticleCommentDto.of(
-        1L,
+        id,
         1L,
         createUserAccountDto(),
+        parentCommentId,
         content,
         LocalDateTime.now(),
         "uno",
@@ -151,7 +161,7 @@ class ArticleCommentServiceTest {
         "password",
         "uno@mail.com",
         "Uno",
-        "This is a memo",
+        "This is memo",
         LocalDateTime.now(),
         "uno",
         LocalDateTime.now(),
@@ -159,12 +169,15 @@ class ArticleCommentServiceTest {
     );
   }
 
-  private ArticleComment createArticleComment(String content) {
-    return ArticleComment.of(
+  private ArticleComment createArticleComment(Long id, String content) {
+    ArticleComment articleComment = ArticleComment.of(
         createArticle(),
         createUserAccount(),
         content
     );
+    ReflectionTestUtils.setField(articleComment, "id", id);
+
+    return articleComment;
   }
 
   private UserAccount createUserAccount() {
@@ -183,6 +196,7 @@ class ArticleCommentServiceTest {
         "title",
         "content"
     );
+    ReflectionTestUtils.setField(article, "id", 1L);
     article.addHashtags(Set.of(createHashtag(article)));
 
     return article;
@@ -191,4 +205,5 @@ class ArticleCommentServiceTest {
   private Hashtag createHashtag(Article article) {
     return Hashtag.of("java");
   }
+
 }

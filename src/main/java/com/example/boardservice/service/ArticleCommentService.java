@@ -38,7 +38,18 @@ public class ArticleCommentService {
     try {
       Article article = articleRepository.getReferenceById(dto.articleId());
       UserAccount userAccount = userAccountRepository.getReferenceById(dto.userAccountDto().userId());
-      articleCommentRepository.save(dto.toEntity(article, userAccount));
+      ArticleComment articleComment = dto.toEntity(article, userAccount);
+
+      // if save request came in with parent id, register it as child of that parent comment
+      if (dto.parentCommentId() != null) {
+        ArticleComment parentComment = articleCommentRepository.getReferenceById(dto.parentCommentId());
+        parentComment.addChildComment(articleComment);
+      }
+      // otherwise, the entity is not yet written into persistence and not managed by entity manager
+      // call .save() to persist comment
+      else {
+        articleCommentRepository.save(articleComment);
+      }
     } catch (EntityNotFoundException e) {
       log.warn("Failed to save comment. Required information could not be found - dto: {}", e.getLocalizedMessage());
     }

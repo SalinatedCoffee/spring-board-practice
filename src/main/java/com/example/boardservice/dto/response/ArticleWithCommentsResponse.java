@@ -56,8 +56,7 @@ public record ArticleWithCommentsResponse(
 
     // then find all child comments and 'register' them to their parents
     map.values().stream()
-//        .filter(ArticleCommentResponse::hasParentComment)
-        .filter(comment -> comment.hasParentComment())
+        .filter(ArticleCommentResponse::hasParentComment)
         .forEach(comment -> {
           ArticleCommentResponse parentComment = map.get(comment.parentCommentId());
           parentComment.childComments().add(comment);

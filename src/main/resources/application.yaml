@@ -11,10 +11,9 @@ logging:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/board
-    username: sc
-    # TODO: eventually use environment var to set password
-    password: 1234
+    url: ${LOCAL_DB_URL}
+    username: ${LOCAL_DB_USERNAME}
+    password: ${LOCAL_DB_PASSWORD}
   jpa:
     # Important performance optimization: turn off open session in view in production
     # tl;dr - with OSIV on, spring spins up a hibernate session for each request and keeps it alive until req is served
